@@ -7,6 +7,7 @@ import {
   ServiceProvider,
 } from "../constant";
 import { isModelAvailableInServer } from "../utils/model";
+import { cloudflareAIGatewayUrl } from "../utils/cloudflare";
 
 const serverConfig = getServerSideConfig();
 
@@ -38,7 +39,7 @@ export async function requestOpenai(req: NextRequest) {
   );
 
   let baseUrl =
-    serverConfig.azureUrl || serverConfig.baseUrl || OPENAI_BASE_URL;
+    (isAzure ? serverConfig.azureUrl : serverConfig.baseUrl) || OPENAI_BASE_URL;
 
   if (!baseUrl.startsWith("http")) {
     baseUrl = `https://${baseUrl}`;
@@ -96,7 +97,8 @@ export async function requestOpenai(req: NextRequest) {
     }
   }
 
-  const fetchUrl = `${baseUrl}/${path}`;
+  const fetchUrl = cloudflareAIGatewayUrl(`${baseUrl}/${path}`);
+  console.log("fetchUrl", fetchUrl);
   const fetchOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
